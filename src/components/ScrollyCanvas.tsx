@@ -11,6 +11,7 @@ export default function ScrollyCanvas() {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadProgress, setLoadProgress] = useState(0);
+  const [priorityLoaded, setPriorityLoaded] = useState(false);
 
   // Single source of truth for scrolling progress inside the 500vh area
   const { scrollYProgress } = useScroll({
@@ -40,12 +41,27 @@ export default function ScrollyCanvas() {
   const scale3 = useTransform(scrollYProgress, [0.65, 0.75, 0.85, 0.95], [0.95, 1, 1, 0.95]);
 
   useEffect(() => {
-    // Preload all frames
-    const preloadImages = async () => {
-      const loadedImages: HTMLImageElement[] = [];
-      let loadedCount = 0;
+    // Stage 1: Load First Frame (Priority)
+    const loadFirstFrame = () => {
+      const img = new Image();
+      img.src = `/sequence/frame_000_delay-0.066s.png`;
+      img.onload = () => {
+        setPriorityLoaded(true);
+        // Paint it immediately
+        requestAnimationFrame(() => drawFrame(0));
+      };
+      // For background array
+      return img;
+    };
 
-      for (let i = 0; i < FRAME_COUNT; i++) {
+    // Stage 2: Load Everything Else (Background)
+    const preloadImages = async () => {
+      const firstImg = loadFirstFrame();
+      const loadedImages: HTMLImageElement[] = [firstImg];
+      let loadedCount = 1;
+
+      // Initialize the rest with placeholder objects
+      for (let i = 1; i < FRAME_COUNT; i++) {
         const img = new Image();
         const frameNumber = String(i).padStart(3, '0');
         img.src = `/sequence/frame_${frameNumber}_delay-0.066s.png`;
@@ -66,7 +82,7 @@ export default function ScrollyCanvas() {
 
   // Frame Draw logic
   const drawFrame = (index: number) => {
-    if (!canvasRef.current || images.length === 0 || !loaded) return;
+    if (!canvasRef.current || images.length === 0) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -159,19 +175,27 @@ export default function ScrollyCanvas() {
 
         </div>
 
-        {/* Loading overlay */}
-        {!loaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#121212] z-50 text-white font-sans transition-opacity duration-1000">
-            <div className="relative w-64 h-[2px] bg-white/10 overflow-hidden mb-6">
-              <motion.div 
-                className="absolute top-0 left-0 h-full bg-white transition-all duration-300"
-                style={{ width: `${loadProgress}%` }}
-              />
-            </div>
+        {/* Loading overlay - only blocks until first frame is ready */}
+        {!priorityLoaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#121212] z-50 text-white font-sans">
             <div className="flex flex-col items-center">
-              <span className="text-4xl font-light tracking-[0.2em] mb-4">{loadProgress}%</span>
-              <span className="text-xs uppercase tracking-[0.4em] text-white/40 animate-pulse">Initializing Cinematic Experience</span>
+              <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6" />
+              <span className="text-xs uppercase tracking-[0.4em] text-white/40">Initializing Cinematic Experience</span>
             </div>
+          </div>
+        )}
+
+        {/* Small Progress Indicator (Non-blocking) */}
+        {!loaded && priorityLoaded && (
+          <div className="absolute bottom-8 right-8 z-40 flex items-center gap-4 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 transition-opacity duration-1000">
+             <div className="w-16 h-[1px] bg-white/10 overflow-hidden relative">
+                <motion.div 
+                  className="absolute top-0 left-0 h-full bg-white"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${loadProgress}%` }}
+                />
+             </div>
+             <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">{loadProgress}% SYNC</span>
           </div>
         )}
       </div>

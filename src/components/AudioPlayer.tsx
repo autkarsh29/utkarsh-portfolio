@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 
 export default function AudioPlayer() {

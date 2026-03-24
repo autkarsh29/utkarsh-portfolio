@@ -10,6 +10,7 @@ export default function ScrollyCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
 
   // Single source of truth for scrolling progress inside the 500vh area
   const { scrollYProgress } = useScroll({
@@ -50,6 +51,7 @@ export default function ScrollyCanvas() {
         img.src = `/sequence/frame_${frameNumber}_delay-0.066s.png`;
         img.onload = () => {
           loadedCount++;
+          setLoadProgress(Math.round((loadedCount / FRAME_COUNT) * 100));
           if (loadedCount === FRAME_COUNT) {
             setLoaded(true);
           }
@@ -159,10 +161,16 @@ export default function ScrollyCanvas() {
 
         {/* Loading overlay */}
         {!loaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#121212] bg-opacity-80 z-50 text-white font-sans transition-opacity duration-500">
-            <div className="flex flex-col items-center animate-pulse">
-              <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin mb-4" />
-              Loading Cinematic Sequence...
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#121212] z-50 text-white font-sans transition-opacity duration-1000">
+            <div className="relative w-64 h-[2px] bg-white/10 overflow-hidden mb-6">
+              <motion.div 
+                className="absolute top-0 left-0 h-full bg-white transition-all duration-300"
+                style={{ width: `${loadProgress}%` }}
+              />
+            </div>
+            <div className="flex flex-col items-center">
+              <span className="text-4xl font-light tracking-[0.2em] mb-4">{loadProgress}%</span>
+              <span className="text-xs uppercase tracking-[0.4em] text-white/40 animate-pulse">Initializing Cinematic Experience</span>
             </div>
           </div>
         )}

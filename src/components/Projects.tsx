@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, GraduationCap, Briefcase, Code2, Sparkles, Building2 } from "lucide-react";
+import { ArrowUpRight, GraduationCap, Briefcase, Code2, Sparkles, Building2, MessageCircle, Mail, Linkedin, CalendarOff } from "lucide-react";
 
 export default function Projects() {
   const experiences = [
@@ -208,16 +208,69 @@ export default function Projects() {
           </div>
         </div>
 
-        {/* Contact / Footer block */}
-        <div className="border-t border-white/10 pt-16 flex flex-col md:flex-row justify-between items-start md:items-center text-white/50 text-sm font-light space-y-4 md:space-y-0">
-          <div>
-            <p className="text-white tracking-widest uppercase mb-2 font-medium">Utkarsh Agarwal</p>
-            <p>Jaipur, Rajasthan, India</p>
+        {/* === CONTACT / CONVERSION SECTION === */}
+        <div className="mt-32 border-t border-white/5 pt-24 pb-12 overflow-hidden relative">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/[0.02] rounded-full blur-3xl -mr-48 -mt-48" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-12">
+            <div className="max-w-xl">
+              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">
+                Ready to optimize your operations?
+              </h2>
+              <p className="text-xl text-white/50 font-light leading-relaxed mb-10">
+                With a proven track record in process excellence and BFSI operations, I'm ready to bring scalable efficiency to your next project.
+              </p>
+              
+              <div className="flex flex-wrap gap-4">
+                <a 
+                  href="mailto:autkarsh29@gmail.com" 
+                  className="px-8 py-4 bg-white text-black font-semibold rounded-full hover:bg-white/90 transition-all flex items-center gap-3 active:scale-95"
+                >
+                  <Mail className="w-5 h-5" />
+                  Book a Consultation
+                </a>
+                <a 
+                  href="https://linkedin.com/in/utkarshagarwal-311802129" 
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold rounded-full hover:bg-white/10 transition-all flex items-center gap-3 active:scale-95"
+                >
+                  <Linkedin className="w-5 h-5" />
+                  LinkedIn Profile
+                </a>
+              </div>
+            </div>
+
+            <div className="text-left md:text-right">
+              <p className="text-white tracking-[0.4em] uppercase mb-4 text-xs font-medium opacity-40">Direct Contact</p>
+              <p className="text-2xl font-light text-white/80 mb-2">+91-9571718523</p>
+              <p className="text-xl font-light text-white/50 mb-8">Jaipur, Rajasthan, India</p>
+              
+              <div className="flex justify-start md:justify-end gap-6 text-white/30">
+                <span className="text-xs uppercase tracking-widest hover:text-white transition-colors cursor-default">SOP Excellence</span>
+                <span className="text-xs uppercase tracking-widest hover:text-white transition-colors cursor-default">BFSI Specialist</span>
+                <span className="text-xs uppercase tracking-widest hover:text-white transition-colors cursor-default">Process Ninja</span>
+              </div>
+            </div>
           </div>
-          <div className="md:text-right space-y-1">
-            <p>+91-9571718523 &nbsp;|&nbsp; <a href="mailto:autkarsh29@gmail.com" className="hover:text-white transition-colors">autkarsh29@gmail.com</a></p>
-            <a href="https://linkedin.com/in/utkarshagarwal-311802129" target="_blank" rel="noreferrer" className="hover:text-white transition-colors underline underline-offset-4 decoration-white/20">linkedin.com/in/utkarshagarwal-311802129</a>
-          </div>
+        </div>
+
+        {/* Floating WhatsApp CTA */}
+        <a 
+          href="https://wa.me/919571718523" 
+          target="_blank" 
+          rel="noreferrer"
+          className="fixed bottom-8 right-8 z-50 p-4 bg-[#25D366] text-white rounded-full shadow-2xl hover:scale-110 active:scale-90 transition-all flex items-center justify-center group"
+          aria-label="Contact on WhatsApp"
+        >
+          <MessageCircle className="w-7 h-7" />
+          <span className="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-3 transition-all duration-500 font-semibold whitespace-nowrap">
+            WhatsApp Me
+          </span>
+        </a>
+
+        <div className="mt-24 text-center text-white/20 text-xs tracking-[0.5em] uppercase pb-12">
+          © {new Date().getFullYear()} Utkarsh Agarwal. Engineered for Excellence.
         </div>
       </div>
     </section>

@@ -44,7 +44,7 @@ export default function ScrollyCanvas() {
     // Stage 1: Load First Frame (Priority)
     const loadFirstFrame = () => {
       const img = new Image();
-      img.src = `/sequence/frame_000_delay-0.066s.png`;
+      img.src = `/sequence/frame_000_delay-0.066s.webp`;
       img.onload = () => {
         setPriorityLoaded(true);
         // Paint it immediately
@@ -64,7 +64,7 @@ export default function ScrollyCanvas() {
       for (let i = 1; i < FRAME_COUNT; i++) {
         const img = new Image();
         const frameNumber = String(i).padStart(3, '0');
-        img.src = `/sequence/frame_${frameNumber}_delay-0.066s.png`;
+        img.src = `/sequence/frame_${frameNumber}_delay-0.066s.webp`;
         img.onload = () => {
           loadedCount++;
           setLoadProgress(Math.round((loadedCount / FRAME_COUNT) * 100));

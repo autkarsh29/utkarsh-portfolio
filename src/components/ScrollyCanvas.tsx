@@ -203,10 +203,15 @@ export default function ScrollyCanvas() {
 
   return (
     <div ref={containerRef} className="h-[500vh] relative w-full bg-[#121212]">
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
+      <div 
+        className="sticky top-0 h-screen w-full overflow-hidden bg-[#121212] bg-cover bg-center transition-opacity duration-500"
+        style={{ 
+          backgroundImage: `url('/sequence/frame_000_delay-0.066s.webp')`,
+        }}
+      >
         <canvas
           ref={canvasRef}
-          className="w-full h-full block"
+          className="w-full h-full block relative z-10"
         />
 
         {/* --- TEXT OVERLAYS SYNCHRONIZED TO CANVAS --- */}
@@ -240,16 +245,6 @@ export default function ScrollyCanvas() {
           </motion.div>
 
         </div>
-
-        {/* Loading overlay - only blocks until first frame is ready */}
-        {!priorityLoaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#121212] z-50 text-white font-sans">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 border-4 border-white/20 border-t-white rounded-full animate-spin mb-6" />
-              <span className="text-xs uppercase tracking-[0.4em] text-white/40">Initializing Cinematic Experience</span>
-            </div>
-          </div>
-        )}
 
         {/* Small Progress Indicator (Non-blocking) */}
         {!loaded && priorityLoaded && (

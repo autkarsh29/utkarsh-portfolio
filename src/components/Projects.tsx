@@ -1,6 +1,22 @@
 'use client';
 
-import { ArrowUpRight, GraduationCap, Briefcase, Code2, Sparkles, Building2, MessageCircle, Mail, Linkedin } from "lucide-react";
+import { ArrowUpRight, GraduationCap, Briefcase, Code2, Sparkles, Building2, MessageCircle, Mail } from "lucide-react";
+
+const LinkedInIcon = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect width="4" height="12" x="2" y="9" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
 
 export default function Projects() {
   const experiences = [
@@ -235,7 +251,7 @@ export default function Projects() {
                   rel="noreferrer"
                   className="px-8 py-4 bg-white/5 border border-white/10 text-white font-semibold rounded-full hover:bg-white/10 transition-all flex items-center gap-3 active:scale-95"
                 >
-                  <Linkedin className="w-5 h-5" />
+                  <LinkedInIcon className="w-5 h-5" />
                   LinkedIn Profile
                 </a>
               </div>

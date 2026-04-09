@@ -13,13 +13,17 @@ export default function AudioPlayer() {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
         // Browsers require user interaction before playing audio
-        audioRef.current.play().catch(e => {
-          console.error("Audio playback failed:", e);
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(e => {
+          console.warn("Audio playback failed or file missing:", e);
+          setIsPlaying(false);
+          alert("Audio file is currently being prepared. Check back soon for the full cinematic experience!");
         });
       }
-      setIsPlaying(!isPlaying);
     }
   };
 

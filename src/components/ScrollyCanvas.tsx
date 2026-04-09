@@ -13,7 +13,6 @@ export default function ScrollyCanvas() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [priorityLoaded, setPriorityLoaded] = useState(false);
 
-  // Single source of truth for scrolling progress inside the 500vh area
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
@@ -40,47 +39,8 @@ export default function ScrollyCanvas() {
   const y3 = useTransform(scrollYProgress, [0.65, 0.95], [100, -100]);
   const scale3 = useTransform(scrollYProgress, [0.65, 0.75, 0.85, 0.95], [0.95, 1, 1, 0.95]);
 
-  useEffect(() => {
-    // Stage 1: Load First Frame (Priority)
-    const loadFirstFrame = () => {
-      const img = new Image();
-      img.src = `/sequence/frame_000_delay-0.066s.webp`;
-      img.onload = () => {
-        setPriorityLoaded(true);
-        // Paint it immediately
-        requestAnimationFrame(() => drawFrame(0));
-      };
-      // For background array
-      return img;
-    };
 
-    // Stage 2: Load Everything Else (Background)
-    const preloadImages = async () => {
-      const firstImg = loadFirstFrame();
-      const loadedImages: HTMLImageElement[] = [firstImg];
-      let loadedCount = 1;
-
-      // Initialize the rest with placeholder objects
-      for (let i = 1; i < FRAME_COUNT; i++) {
-        const img = new Image();
-        const frameNumber = String(i).padStart(3, '0');
-        img.src = `/sequence/frame_${frameNumber}_delay-0.066s.webp`;
-        img.onload = () => {
-          loadedCount++;
-          setLoadProgress(Math.round((loadedCount / FRAME_COUNT) * 100));
-          if (loadedCount === FRAME_COUNT) {
-            setLoaded(true);
-          }
-        };
-        loadedImages.push(img);
-      }
-      setImages(loadedImages);
-    };
-
-    preloadImages();
-  }, []);
-
-  // Frame Draw logic
+  // Frame Draw logic (with Closest-Frame Fallback)
   const drawFrame = (index: number) => {
     if (!canvasRef.current || images.length === 0) return;
 
@@ -88,7 +48,27 @@ export default function ScrollyCanvas() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const img = images[Math.round(index)];
+    const targetIndex = Math.round(index);
+    let img = images[targetIndex];
+
+    // Fallback: Use nearest available frame if target is not loaded
+    if (!img || !img.complete) {
+      // Search outward for the closest available frame
+      for (let offset = 1; offset < FRAME_COUNT; offset++) {
+        const left = targetIndex - offset;
+        const right = targetIndex + offset;
+        
+        if (left >= 0 && images[left]?.complete) {
+          img = images[left];
+          break;
+        }
+        if (right < FRAME_COUNT && images[right]?.complete) {
+          img = images[right];
+          break;
+        }
+      }
+    }
+
     if (!img || !img.complete) return;
 
     // Object-fit: cover logic
@@ -114,6 +94,92 @@ export default function ScrollyCanvas() {
     
     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
   };
+
+  useEffect(() => {
+    const preloadImages = async () => {
+      // Stage 0: Priority Frame 0
+      const firstImg = new Image();
+      const frame0Src = `/sequence/frame_000_delay-0.066s.webp`;
+      firstImg.src = frame0Src;
+      
+      // We set a timeout for the priority image to ensure the site loads even if the frame is slow
+      const priorityTimeout = new Promise((resolve) => {
+        setTimeout(() => {
+          console.warn('Priority frame loading timed out. Proceeding to interaction ready state.');
+          resolve(null);
+        }, 3000); // 3 seconds timeout
+      });
+
+      const priorityLoad = new Promise((resolve) => {
+        firstImg.onload = () => {
+          setPriorityLoaded(true);
+          requestAnimationFrame(() => drawFrame(0));
+          resolve(null);
+        };
+        firstImg.onerror = () => {
+          console.error(`Failed to load priority frame: ${frame0Src}`);
+          // Still resolve to allow the site to "load" and show fallback or empty canvas
+          setPriorityLoaded(true); 
+          resolve(null);
+        };
+      });
+
+      await Promise.race([priorityLoad, priorityTimeout]);
+
+      const loadedImages: HTMLImageElement[] = new Array(FRAME_COUNT);
+      loadedImages[0] = firstImg;
+      setImages([...loadedImages]);
+
+      let loadedCount = 1;
+      const BATCH_SIZE = 8;
+      const CRITICAL_THRESHOLD = 40; // Site is "Loaded" after 40 frames
+
+      // Helper for batch loading
+      const loadBatch = async (start: number, end: number) => {
+        for (let i = start; i < end; i += BATCH_SIZE) {
+          const batchPromises = [];
+          for (let j = i; j < Math.min(i + BATCH_SIZE, end); j++) {
+            const img = new Image();
+            const frameNumber = String(j).padStart(3, '0');
+            img.src = `/sequence/frame_${frameNumber}_delay-0.066s.webp`;
+            
+            const p = new Promise((resolve) => {
+              img.onload = () => {
+                loadedCount++;
+                setLoadProgress(Math.round((loadedCount / FRAME_COUNT) * 100));
+                resolve(null);
+              };
+              img.onerror = () => {
+                console.warn(`Failed to preview frame ${j}`);
+                loadedCount++; // Still count towards progress to avoid stuck indicator
+                resolve(null);
+              };
+            });
+            batchPromises.push(p);
+            loadedImages[j] = img;
+          }
+          await Promise.all(batchPromises);
+          
+          // Trigger UI state updates
+          if (loadedCount >= CRITICAL_THRESHOLD && !loaded) {
+            setLoaded(true);
+          }
+          if (i % (BATCH_SIZE * 2) === 1 || loadedCount === FRAME_COUNT) {
+            setImages([...loadedImages]);
+          }
+        }
+      };
+
+      // Stage 1: Critical (1 to 40)
+      await loadBatch(1, CRITICAL_THRESHOLD);
+      setLoaded(true); // Ensure interaction ready
+
+      // Stage 2: Background (41 to 119)
+      await loadBatch(CRITICAL_THRESHOLD, FRAME_COUNT);
+    };
+
+    preloadImages();
+  }, []);
 
   useMotionValueEvent(frameIndex, "change", (latest) => {
     requestAnimationFrame(() => drawFrame(latest));

@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, GraduationCap, Briefcase, Code2, Sparkles, Building2, MessageCircle, Mail, Linkedin, CalendarOff } from "lucide-react";
+import { ArrowUpRight, GraduationCap, Briefcase, Code2, Sparkles, Building2, MessageCircle, Mail, Linkedin } from "lucide-react";
 
 export default function Projects() {
   const experiences = [
@@ -218,7 +218,7 @@ export default function Projects() {
                 Ready to optimize your operations?
               </h2>
               <p className="text-xl text-white/50 font-light leading-relaxed mb-10">
-                With a proven track record in process excellence and BFSI operations, I'm ready to bring scalable efficiency to your next project.
+                With a proven track record in process excellence and BFSI operations, I&apos;m ready to bring scalable efficiency to your next project.
               </p>
               
               <div className="flex flex-wrap gap-4">
